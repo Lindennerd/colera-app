@@ -1,13 +1,13 @@
 import { relations, sql } from "drizzle-orm";
 import {
-  bigint,
+  boolean,
   index,
   int,
+  mysqlEnum,
   mysqlTableCreator,
   primaryKey,
   text,
   timestamp,
-  uniqueIndex,
   varchar,
 } from "drizzle-orm/mysql-core";
 import { type AdapterAccount } from "next-auth/adapters";
@@ -19,21 +19,6 @@ import { type AdapterAccount } from "next-auth/adapters";
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
 export const mysqlTable = mysqlTableCreator((name) => `colera-app_${name}`);
-
-export const example = mysqlTable(
-  "example",
-  {
-    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-    name: varchar("name", { length: 256 }),
-    createdAt: timestamp("created_at")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updatedAt").onUpdateNow(),
-  },
-  (example) => ({
-    nameIndex: uniqueIndex("name_idx").on(example.name),
-  })
-);
 
 export const users = mysqlTable("user", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
@@ -106,3 +91,93 @@ export const verificationTokens = mysqlTable(
     compoundKey: primaryKey(vt.identifier, vt.token),
   })
 );
+
+export const company = mysqlTable("company", {
+  id: int("id").notNull().primaryKey(),
+  name: varchar("name", { length: 256 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export const licensings = mysqlTable("licensing", {
+  id: int("id").notNull().primaryKey(),
+  companyId: int("companyId").notNull(),
+  active: boolean("active"),
+  maxUsers: int("maxUsers").default(10),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export const companyLicensing = relations(company, ({ one }) => ({
+  licensing: one(licensings, {
+    fields: [company.id],
+    references: [licensings.companyId],
+  }),
+}));
+
+export const companyUsers = mysqlTable(
+  "companyUser",
+  {
+    companyId: int("companyId").notNull(),
+    userId: varchar("userId", { length: 255 }).notNull(),
+    role: mysqlEnum("role", ["owner", "admin", "user"]).default("user"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updatedAt").onUpdateNow(),
+  },
+  (companyUser) => ({
+    compoundKey: primaryKey(companyUser.companyId, companyUser.userId),
+  })
+);
+
+export const clientType = mysqlTable("clientType", {
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar("name", { length: 256 }),
+  companyId: int("companyId").notNull(),
+  fieldsDefinitionId: int("fieldsDefinitionId").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export const fieldsDefinition = mysqlTable("fieldsDefinition", {
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar("name", { length: 256 }),
+  type: mysqlEnum("type", [
+    "text",
+    "number",
+    "date",
+    "boolean",
+    "email",
+  ]).default("text"),
+  order: int("order").default(0),
+  required: boolean("required").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export const clientTypeRelations = relations(clientType, ({ one, many }) => ({
+  company: one(company, {
+    fields: [clientType.companyId],
+    references: [company.id],
+  }),
+  fieldsDefinition: many(fieldsDefinition),
+}));
+
+export const client = mysqlTable("client", {
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar("name", { length: 256 }),
+  companyId: int("companyId").notNull(),
+  clientTypeId: int("clientTypeId").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export const clientRelations = relations(client, ({ one }) => ({
+  company: one(company, {
+    fields: [client.companyId],
+    references: [company.id],
+  }),
+  clientType: one(clientType, {
+    fields: [client.clientTypeId],
+    references: [clientType.id],
+  }),
+}));

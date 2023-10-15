@@ -9,4 +9,5 @@ export default {
     connectionString: env.DATABASE_URL,
   },
   tablesFilter: ["colera-app_*"],
+  out: "./src/server/db/migrations",
 } satisfies Config;
