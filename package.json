@@ -20,6 +20,7 @@
     "@trpc/next": "^10.37.1",
     "@trpc/react-query": "^10.37.1",
     "@trpc/server": "^10.37.1",
+    "antd": "^5.10.1",
     "drizzle-orm": "^0.28.5",
     "mysql2": "^3.6.2",
     "next": "^13.5.4",

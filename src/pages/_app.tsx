@@ -1,6 +1,8 @@
+import { ConfigProvider } from "antd";
 import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
+import theme from "~/theme/theme.config";
 
 import { api } from "~/utils/api";
 
@@ -12,7 +14,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
-      <Component {...pageProps} />
+      <ConfigProvider theme={theme}>
+        <Component {...pageProps} />
+      </ConfigProvider>
     </SessionProvider>
   );
 };
