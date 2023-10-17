@@ -1,3 +1,8 @@
-export const CreateCompany = () => {
-  return <h1>Create Company Wizard</h1>;
-};
+import CompanyForm from "~/components/company/forms/CompanyForm";
+export default function CreateCompany() {
+  return (
+    <>
+      <CompanyForm />
+    </>
+  );
+}

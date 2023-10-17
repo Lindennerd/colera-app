@@ -95,6 +95,9 @@ export const verificationTokens = mysqlTable(
 export const company = mysqlTable("company", {
   id: int("id").notNull().primaryKey(),
   name: varchar("name", { length: 256 }),
+  logo: varchar("logo", { length: 256 }),
+  email: varchar("email", { length: 256 }),
+  address: varchar("address", { length: 256 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -167,8 +170,12 @@ export const client = mysqlTable("client", {
   name: varchar("name", { length: 256 }),
   companyId: int("companyId").notNull(),
   clientTypeId: int("clientTypeId").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
+  createdAt: timestamp("created_at")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updatedAt")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`),
 });
 
 export const clientRelations = relations(client, ({ one }) => ({

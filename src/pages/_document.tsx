@@ -4,7 +4,11 @@ import Document, { Head, Html, Main, NextScript } from "next/document";
 
 const MyDocument = () => (
   <Html lang="en">
-    <Head />
+    <Head>
+      <meta charSet="utf-8" />
+      <link href="/favicon.ico" rel="shortcut icon" />
+      <meta content="width=device-width, initial-scale=1" name="viewport" />
+    </Head>
     <body>
       <Main />
       <NextScript />
